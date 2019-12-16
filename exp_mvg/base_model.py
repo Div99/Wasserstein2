@@ -35,7 +35,7 @@ class Base(object):
         raise NotImplementedError("Please Implement this method")
 
     def define_g(self, config):
-        self.g = networks.get_g(config)
+        self.g = networks.get_g(config, self.phi)
         self.g_optimizer = networks.get_optim(self.g.parameters(), config.g_lr, config)
 
     def get_tx(self, x, reverse=False):

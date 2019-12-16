@@ -29,12 +29,17 @@ class Options(object):
         # data
         parser.add_argument('--mnist_path', type=str, default='./mnist')
 
+        # new stuff
+        parser.add_argument('--nabla', type=bool, default=False)
+        parser.add_argument('--share_weights', type=bool, default=False)
+
         # networks
         parser.add_argument('--d_n_layers', type=int, default=2)
         parser.add_argument('--g_n_layers', type=int, default=2)
         parser.add_argument('--n_hidden', type=int, default=1024)
-        parser.add_argument('--g_norm', type=str, choices=['none', 'batch'], default='batch', help='normalization (generator only)')
-        parser.add_argument('--activation', type=str, choices=['relu', 'elu'], default='relu', help='activation function')
+        parser.add_argument('--d_norm', type=str, choices=['none', 'batch', 'spectral'], default='batch', help='normalization (discrimantor only)')
+        parser.add_argument('--g_norm', type=str, choices=['none', 'batch', 'spectral'], default='batch', help='normalization (generator only)')
+        parser.add_argument('--activation', type=str, default='relu', help='activation function')
 
         # losses
         # w2 only

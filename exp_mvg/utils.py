@@ -1,5 +1,6 @@
 import numpy as np
-np.set_printoptions(threshold=np.nan)
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 import torch
 import os
 import torchvision.utils as vutils

@@ -9,7 +9,8 @@ from torch.distributions.multivariate_normal import MultivariateNormal
 def get_loader(config):
     tf = transforms.Compose([transforms.Resize(28),
                              transforms.ToTensor(),
-                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+                             transforms.Normalize((0.5,), (0.5,))
+                            ])
     mnist = datasets.MNIST(root=config.mnist_path, train=True, download=True, transform=tf)
     mnist_loader = data.DataLoader(dataset=mnist, batch_size=config.batch_size,
                                    shuffle=True,

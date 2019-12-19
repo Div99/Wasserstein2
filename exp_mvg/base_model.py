@@ -90,6 +90,7 @@ class Base(object):
 
     def get_visuals(self, config):
         gz = self.g(self.fixed_z)
+        
         x, y = self.fixed_r, gz
         tx, ty = self.get_tx(x), self.get_tx(y, reverse=True)
         images = OrderedDict([('X', x),

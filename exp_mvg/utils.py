@@ -41,6 +41,10 @@ def save_networks(networks, model_dir):
     for k, v in networks.items():
         torch.save(v.state_dict(), os.path.join(model_dir, ('%s.pkl' % k)))
 
+def load_networks(networks, model_dir):
+    for k, v in networks.items():        
+        v.load_state_dict(torch.load(os.path.join(model_dir, ('%s.pkl' % k))))
+        
 def unsqueeze(tensor, ndim=2):
     for it in range(ndim-1):
         tensor = tensor.unsqueeze(1)

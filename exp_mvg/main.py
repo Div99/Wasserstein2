@@ -11,7 +11,8 @@ from w2_model import W2
 from bot_model import BaryOT
 from options import Options
 from tensorboardX import SummaryWriter
-
+from torchdiffeq import odeint
+import torch
 def main():
     ## parse flags
     config = Options().parse()
@@ -43,10 +44,12 @@ def main():
         model = W1(config, r_loader, z_loader)
     elif config.solver == 'w2':
         model = W2(config, r_loader, z_loader)
+        
     elif config.solver == 'bary_ot':
         model = BaryOT(config, r_loader, z_loader)
     cudnn.benchmark = True
     networks = model.get_networks()
+#     utils.load_networks(networks, "test_ode2/models")
     utils.print_networks(networks)
 
     ## training
@@ -91,7 +94,11 @@ def main():
     fixed_z = pickle.load(file)
     file.close()
     fixed_z = utils.to_var(fixed_z)
-    fixed_gz = model.g(fixed_z).view(*fixed_z.size())
+    
+    if config.ode:
+        fixed_gz = odeint(lambda t, z: model.g(z, t), fixed_z, torch.tensor([1.0]))[0]
+    else:
+        fixed_gz = model.g(fixed_z).view(*fixed_z.size())
     utils.visualize_single(fixed_gz, os.path.join(img_dir, 'test.png'), config)
 
 if __name__ == '__main__':

@@ -58,9 +58,9 @@ class GEN(nn.Module):
         super(GEN, self).__init__()
         self.network = network
         in_h = 28*28
-        self.velocity = torch.zeros_like(in_h)
+#         self.velocity = torch.zeros_like(in_h)
         
-    def forward(self, input):
+    def forward(self, input, t= None):
         inp = input.view(input.size(0), -1)
         inp = Variable(inp.data, requires_grad=True)
         nabla_phi = torch.autograd.grad(self.network(inp), inp,
@@ -95,7 +95,7 @@ class GEN_network(nn.Module):
             modules.append(nn.Tanh())
         self.model = nn.Sequential(*modules)
 
-    def forward(self, input):
+    def forward(self, input, t= None):
         output = self.model(input.view(input.size(0), -1))
         if self.nabla:
             return output

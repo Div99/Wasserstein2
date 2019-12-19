@@ -5,6 +5,7 @@ import networks
 import itertools
 from collections import OrderedDict
 from base_model import Base
+from torchdiffeq import odeint
 
 class W2(Base):
     """Wasserstein-2 based model W2GAN"""
@@ -12,7 +13,11 @@ class W2(Base):
     def get_data(self, config):
         """override z with gz"""
         z = utils.to_var(next(self.z_generator))
-        gz = self.g(z)
+        if config.ode:
+            gz = odeint(lambda t, z: self.g(z, t), z, torch.tensor([1.0]))[0]
+        else:
+            gz = self.g(z)     
+            
         r = utils.to_var(next(self.r_generator))
         if gz.size() != r.size():
             z = utils.to_var(next(self.z_generator))
@@ -58,3 +63,21 @@ class W2(Base):
                             ('eps', self.eps)])
         nets['gen'] = self.g
         return nets
+    
+    
+    def get_visuals(self, config):
+        
+        if config.ode:
+            gz = odeint(lambda t, z: self.g(z, t), self.fixed_z, torch.tensor([1.0]))[0]
+        else:
+            gz = self.g(self.fixed_z)     
+            
+        
+        x, y = self.fixed_r, gz
+        tx, ty = self.get_tx(x), self.get_tx(y, reverse=True)
+        images = OrderedDict([('X', x),
+                              ('TX', tx),
+                              ('Y', y),
+                              ('TY', ty),
+                              ('ZY', self.fixed_z)])
+        return images

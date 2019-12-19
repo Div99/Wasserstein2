@@ -30,6 +30,7 @@ class Options(object):
         parser.add_argument('--mnist_path', type=str, default='./mnist')
 
         # new stuff
+        parser.add_argument('--ode', type=bool, default=False)
         parser.add_argument('--nabla', type=bool, default=False)
         parser.add_argument('--share_weights', type=bool, default=False)
 

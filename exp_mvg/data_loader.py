@@ -1,10 +1,9 @@
-import torch
 import numpy as np
+import torch
 import torch.utils.data as data
-
-from torchvision import datasets
-from torchvision import transforms
 from torch.distributions.multivariate_normal import MultivariateNormal
+from torchvision import datasets, transforms
+
 
 def get_loader(config):
     tf = transforms.Compose([transforms.Resize(28),
@@ -14,7 +13,8 @@ def get_loader(config):
     mnist = datasets.MNIST(root=config.mnist_path, train=True, download=True, transform=tf)
     mnist_loader = data.DataLoader(dataset=mnist, batch_size=config.batch_size,
                                    shuffle=True,
-                                   num_workers=4)
+                                   num_workers=4,
+                                   pin_memory=True)
     r_loader = RealDataGenerator(mnist_loader)
     mu, cov = compute_mnist_stats(mnist)
     z_loader = MVGaussianGenerator(config.batch_size, mu, cov)
@@ -40,7 +40,7 @@ class MVGaussianGenerator(DataGenerator):
     def __init__(self, batch_size, mu, cov):
         self.batch_size = batch_size
         self.image_size = 28
-        cov = cov + torch.eye(cov.size(0)) * 1e-1
+        cov = cov + torch.eye(cov.size(0)) * 1e-2
         self.generator = MultivariateNormal(mu, cov)
 
     def get_batch(self):

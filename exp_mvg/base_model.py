@@ -1,10 +1,13 @@
-import torch
-import utils
 import functools
+from collections import OrderedDict
+
+import torch
+from torch.autograd import Variable
+
 import losses
 import networks
-from torch.autograd import Variable
-from collections import OrderedDict
+import utils
+
 
 class Base(object):
     def __init__(self, config, r_loader, z_loader):
@@ -36,14 +39,15 @@ class Base(object):
 
     def define_g(self, config):
         self.g = networks.get_g(config, self.phi)
+        print("--> Created generator")
         self.g_optimizer = networks.get_optim(self.g.parameters(), config.g_lr, config)
 
-    def get_tx(self, x, reverse=False):
+    def get_tx(self, x, reverse=False, gen=False):
         x = Variable(x.data, requires_grad=True)
         if reverse:
-            ux = self.psi(x)
+            ux = self.psi(x)  # if gen == False else self.psi0(x)
         else:
-            ux = self.phi(x)
+            ux = self.phi(x)  # if gen == False else self.phi0(x)
         dux = torch.autograd.grad(outputs=ux, inputs=x,
                                   grad_outputs=utils.get_ones(ux.size()),
                                   create_graph=True, retain_graph=True,
@@ -54,7 +58,8 @@ class Base(object):
     def train_iter(self, config):
         for it in range(config.d_iters):
             self.train_diter(config)
-        self.train_giter(config)
+        for it in range(config.g_iters):
+            self.train_giter(config)
 
     def train_diter(self, config):
         self.d_optimizer.zero_grad()
@@ -71,7 +76,7 @@ class Base(object):
     def train_giter(self, config):
         self.g_optimizer.zero_grad()
         x, y = self.get_data(config)
-        tx, ty = self.get_tx(x), self.get_tx(y, reverse=True)
+        tx, ty = self.get_tx(x, gen=True), self.get_tx(y, reverse=True, gen=True)
         ux, vy = self.phi(x), self.psi(y)
         g_loss = self.calc_gloss(x, y, ux, vy, config)
         g_loss.backward()

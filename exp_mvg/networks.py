@@ -2,7 +2,9 @@ import torch
 import torch.nn as nn
 from torch import optim
 from torch.autograd import Variable
+
 import utils
+
 
 def get_optim(parameters, lr, config):
     return optim.Adam(parameters, lr, [config.beta1, config.beta2])
@@ -15,10 +17,11 @@ def get_d(config):
     return net
 
 def get_g(config, phi):
-    residual = (config.solver != 'bary_ot')
+    residual = config.residual  # (config.solver != 'bary_ot')
     if not config.share_weights:
         net = GEN_network(config.n_hidden, config.g_n_layers, config.g_norm,
                   config.activation, residual, config.nabla)
+        # net.apply(weights_init_g)
         if residual:
             net.apply(weights_init_g)
         if torch.cuda.is_available():
@@ -57,8 +60,8 @@ class GEN(nn.Module):
     def __init__(self, network):
         super(GEN, self).__init__()
         self.network = network
-        in_h = 28*28
-        self.velocity = torch.zeros_like(in_h)
+        # in_h = 28*28
+        # self.velocity = torch.zeros_like(in_h)
         
     def forward(self, input):
         inp = input.view(input.size(0), -1)

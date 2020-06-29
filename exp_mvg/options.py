@@ -1,11 +1,17 @@
 import argparse
 
+import configargparse
+
+
 class Options(object):
     def __init__(self):
         return
 
     def parse(self):
-        parser = argparse.ArgumentParser()
+
+        parser = configargparse.ArgParser(description='W2GAN')
+        parser.add('-c', '--config',
+                is_config_file=True, help='config file')
 
         # experiment
         parser.add_argument('--exp_name', type=str, default='test_run')
@@ -22,16 +28,18 @@ class Options(object):
         # w1 / w2 only
         parser.add_argument('--train_iters', type=int, default=100000)
         parser.add_argument('--d_iters', type=int, default=5, help='# d updates per g update; defaults to 1 if solver=bary_ot')
+        parser.add_argument('--g_iters', type=int, default=1, help='#g update; defaults to 1 if solver=bary_ot')
         # bary-ot only (2 stages)
         parser.add_argument('--dual_iters', type=int, default=20000)
         parser.add_argument('--map_iters', type=int, default=20000)
 
         # data
-        parser.add_argument('--mnist_path', type=str, default='./mnist')
+        parser.add_argument('--mnist_path', type=str, default='/scratch/datasets/mnist')
 
         # new stuff
-        parser.add_argument('--nabla', type=bool, default=False)
-        parser.add_argument('--share_weights', type=bool, default=False)
+        parser.add_argument('--nabla',  action='store_true')
+        parser.add_argument('--share_weights', action='store_true')
+        parser.add_argument('--alpha', type=float, default=0.0001)
 
         # networks
         parser.add_argument('--d_n_layers', type=int, default=2)
@@ -40,6 +48,7 @@ class Options(object):
         parser.add_argument('--d_norm', type=str, choices=['none', 'batch', 'spectral'], default='batch', help='normalization (discrimantor only)')
         parser.add_argument('--g_norm', type=str, choices=['none', 'batch', 'spectral'], default='batch', help='normalization (generator only)')
         parser.add_argument('--activation', type=str, default='relu', help='activation function')
+        parser.add_argument('--residual', action='store_true', help='make network residual')
 
         # losses
         # w2 only

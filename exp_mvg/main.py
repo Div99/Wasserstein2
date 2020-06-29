@@ -1,8 +1,11 @@
+#!/usr/bin/env python3
+
 import os
 import time
 import utils
 import pickle
 import glob
+import wandb
 
 from torch.backends import cudnn
 from data_loader import get_loader
@@ -12,10 +15,17 @@ from bot_model import BaryOT
 from options import Options
 from tensorboardX import SummaryWriter
 
+import wandb
+
+
 def main():
     ## parse flags
     config = Options().parse()
     utils.print_opts(config)
+
+    ## setup wandb
+    wandb.init(project="w2gan", sync_tensorboard=True)
+    wandb.config.update(config) # adds all of the arguments as config variables
 
     ## set up folders
     exp_dir = os.path.join(config.exp_dir, config.exp_name)
@@ -49,6 +59,10 @@ def main():
     networks = model.get_networks()
     utils.print_networks(networks)
 
+#     for name, net in networks.items():
+#         if name == 'gen':
+#             wandb.watch(net)
+
     ## training
     ## stage 1 (dual stage) of bary_ot
     start_time = time.time()
@@ -80,6 +94,7 @@ def main():
             utils.print_out(stats, step+1, map_iters, tbx_writer)
         if ((step+1) % 500) == 0:
             images = model.get_visuals(config)
+            wandb.log({"examples" : [wandb.Image(i) for name, i in images.items()]})
             utils.visualize_iter(images, img_dir, step+1, config)
     print("Training complete.")
     networks = model.get_networks()
